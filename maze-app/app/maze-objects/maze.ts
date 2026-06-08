@@ -1,5 +1,5 @@
 export type Position = { x: number; y: number };
-export type CellType = 'wall' | 'path' | 'start' | 'end';
+export type CellType = 'wall' | 'path' | 'start' | 'end' | 'trap';
 
 export type GameStatus = 'idle' | 'playing' | 'won' | 'lost';
 
@@ -10,7 +10,7 @@ export class Maze {
   width: number;
   height: number;
 
-  // gridMap: 0 = path, 1 = wall, 2 = start, 3 = end
+  // gridMap: 0 = path, 1 = wall, 2 = start, 3 = end, 4 = trap
   constructor(gridMap: number[][]) {
     this.grid = [];
     let start = {x: 0, y: 0};
