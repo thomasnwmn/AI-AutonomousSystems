@@ -32,6 +32,9 @@ export class Maze {
           row.push('end');
           end = { x, y };
         }
+        else if (val === 4) {
+            row.push('trap');
+        }
       }
       this.grid.push(row);
     }
