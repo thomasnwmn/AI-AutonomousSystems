@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { levels } from './levels/levels';
 import { Position, GameStatus } from './maze-objects/maze';
+import { useSearchParams } from 'next/navigation';
 
 interface Command {
   direction: 'up' | 'down' | 'left' | 'right';
@@ -30,8 +31,7 @@ export default function MazeGame() {
   const [status, setStatus] = useState<GameStatus>('idle');
   const [message, setMessage] = useState('');
 
-  const queryString = window.location.search;
-  const urlParams = new URLSearchParams(queryString);
+  const urlParams = useSearchParams();
   const group = urlParams.get('group');
 
   const currentMaze = levels[currentLevelIdx];
