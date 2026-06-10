@@ -32,7 +32,7 @@ export default function MazeGame() {
   const [message, setMessage] = useState('');
 
   const urlParams = useSearchParams();
-  const group = urlParams.get('group');
+  const group = Number(urlParams.get('group'));
 
   const currentMaze = levels[currentLevelIdx];
 
@@ -79,44 +79,44 @@ export default function MazeGame() {
         setPosition(currPos);
 
         if (currentMaze.isEnd(currPos.x, currPos.y)) {
+            console.log(group);
           setStatus('won');
-          switch(group) {
-            case '1':
-                if (currentLevelIdx === 2) {
+          if (group === 1) {
+                if (currentLevelIdx === 1) {
                     setMessage('You escaped! Your first code is 123!');
-                } else if (currentLevelIdx === 4) {
+                } else if (currentLevelIdx === 3) {
                     setMessage ('You escaped! Your second code is 234!')
-                } else if (currentLevelIdx === 7) {
+                } else if (currentLevelIdx === 6) {
                     setMessage('You escaped! Your third code is 345!');
                 } else {
                     setMessage('You escaped!');
                 }
-            case '2':
-                if (currentLevelIdx === 2) {
+            } else if (group === 2) {
+                if (currentLevelIdx === 1) {
                     setMessage('You escaped! Your first code is 456!');
-                } else if (currentLevelIdx === 4) {
+                } else if (currentLevelIdx === 3) {
                     setMessage ('You escaped! Your second code is 567!')
-                } else if (currentLevelIdx === 7) {
+                } else if (currentLevelIdx === 6) {
                     setMessage('You escaped! Your third code is 678!');
                 } else {
                     setMessage('You escaped!');
                 }
-            case '3':
-                if (currentLevelIdx === 2) {
+            } else if (group === 3) {
+                if (currentLevelIdx === 1) {
                     setMessage('You escaped! Your first code is 789!');
-                } else if (currentLevelIdx === 4) {
+                } else if (currentLevelIdx === 3) {
                     setMessage ('You escaped! Your second code is 890!')
-                } else if (currentLevelIdx === 7) {
+                } else if (currentLevelIdx === 6) {
                     setMessage('You escaped! Your third code is 901!');
                 } else {
                     setMessage('You escaped!');
                 }
-            case '4':
-                if (currentLevelIdx === 2) {
+            } else if (group === 4) {
+                if (currentLevelIdx === 1) {
                     setMessage('You escaped! Your first code is 012!');
-                } else if (currentLevelIdx === 4) {
+                } else if (currentLevelIdx === 3) {
                     setMessage ('You escaped! Your second code is 123!')
-                } else if (currentLevelIdx === 7) {
+                } else if (currentLevelIdx === 6) {
                     setMessage('You escaped! Your third code is 234!');
                 } else {
                     setMessage('You escaped!');
