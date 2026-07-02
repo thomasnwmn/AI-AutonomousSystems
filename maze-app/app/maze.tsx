@@ -83,45 +83,41 @@ export default function MazeGame() {
           setStatus('won');
           if (group === 1) {
                 if (currentLevelIdx === 1) {
-                    setMessage('You escaped! Your first code is 123!');
+                    setMessage('You escaped! Your first code is 7!');
                 } else if (currentLevelIdx === 3) {
-                    setMessage ('You escaped! Your second code is 234!')
+                    setMessage ('You escaped! Your second code is 6!')
                 } else if (currentLevelIdx === 6) {
-                    setMessage('You escaped! Your third code is 345!');
+                    setMessage('You escaped! Your third code is 4!');
+                } else if (currentLevelIdx === 9) {
+                  setMessage('You escaped! Your third code is 2!');
                 } else {
                     setMessage('You escaped!');
                 }
             } else if (group === 2) {
                 if (currentLevelIdx === 1) {
-                    setMessage('You escaped! Your first code is 456!');
+                    setMessage('You escaped! Your first code is 2!');
                 } else if (currentLevelIdx === 3) {
-                    setMessage ('You escaped! Your second code is 567!')
+                    setMessage ('You escaped! Your second code is 5!')
                 } else if (currentLevelIdx === 6) {
-                    setMessage('You escaped! Your third code is 678!');
+                    setMessage('You escaped! Your third code is 0!');
+                } else if (currentLevelIdx === 9) {
+                  setMessage('You escaped! Your third code is 1!');
                 } else {
                     setMessage('You escaped!');
                 }
             } else if (group === 3) {
                 if (currentLevelIdx === 1) {
-                    setMessage('You escaped! Your first code is 789!');
+                    setMessage('You escaped! Your first code is 5!');
                 } else if (currentLevelIdx === 3) {
-                    setMessage ('You escaped! Your second code is 890!')
+                    setMessage ('You escaped! Your second code is 8!')
                 } else if (currentLevelIdx === 6) {
-                    setMessage('You escaped! Your third code is 901!');
+                    setMessage('You escaped! Your third code is 9!');
+                } else if (currentLevelIdx === 9) {
+                  setMessage('You escaped! Your third code is 6!');
                 } else {
                     setMessage('You escaped!');
                 }
-            } else if (group === 4) {
-                if (currentLevelIdx === 1) {
-                    setMessage('You escaped! Your first code is 012!');
-                } else if (currentLevelIdx === 3) {
-                    setMessage ('You escaped! Your second code is 123!')
-                } else if (currentLevelIdx === 6) {
-                    setMessage('You escaped! Your third code is 234!');
-                } else {
-                    setMessage('You escaped!');
-                }
-          }
+            }
           return;
         }
       }
@@ -148,7 +144,7 @@ export default function MazeGame() {
 
   return (
     <div className="flex flex-col items-center gap-6 w-full text-slate-800 dark:text-slate-200">
-      <h1 className="text-3xl font-bold">Maze Level {currentLevelIdx + 1}</h1>
+      <h1 className="text-3xl font-bold">Maze Level {currentLevelIdx + 1} of {levels.length}</h1>
       
       {/* Maze Grid */}
       <div 
