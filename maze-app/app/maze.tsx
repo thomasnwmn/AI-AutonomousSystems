@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { levels } from './levels/levels';
 import { Position, GameStatus } from './maze-objects/maze';
 import { useSearchParams } from 'next/navigation';
@@ -11,14 +11,14 @@ interface Command {
 }
 
 function parseCode(code: string): Command[] {
-  // Supports moveRight(1), moveLeft(1), turnLeft(1), etc.
-  const regex = /(?:move|turn)(Up|Down|Left|Right)\s*\(\s*(\d+)\s*\)/gi;
+  // Supports moveRight(1), up(), turnLeft(1), etc.
+  const regex = /(?:move|turn)?(Up|Down|Left|Right)\s*\(\s*(\d*)\s*\)/gi;
   const commands: Command[] = [];
   let match;
   while ((match = regex.exec(code)) !== null) {
     commands.push({
       direction: match[1].toLowerCase() as any,
-      steps: parseInt(match[2], 10),
+      steps: match[2] ? parseInt(match[2], 10) : 1,
     });
   }
   return commands;
@@ -30,6 +30,10 @@ export default function MazeGame() {
   const [position, setPosition] = useState<Position>({ x: 0, y: 0 });
   const [status, setStatus] = useState<GameStatus>('idle');
   const [message, setMessage] = useState('');
+  const [trail, setTrail] = useState<Position[]>([]);
+  const [runningCmdIdx, setRunningCmdIdx] = useState<number | null>(null);
+  const [commandsToRun, setCommandsToRun] = useState<Command[]>([]);
+  const codeRef = useRef<HTMLTextAreaElement>(null);
 
   const urlParams = useSearchParams();
   const group = Number(urlParams.get('group'));
@@ -41,27 +45,36 @@ export default function MazeGame() {
     setPosition(currentMaze.startPos);
     setStatus('idle');
     setMessage('');
+    setTrail([]);
+    setRunningCmdIdx(null);
+    setCommandsToRun([]);
   }, [currentLevelIdx, currentMaze]);
 
   const handleRun = async () => {
     if (status === 'playing') return;
     setStatus('playing');
     setMessage('');
+    setTrail([]);
+    setRunningCmdIdx(null);
 
     const commands = parseCode(code);
+    setCommandsToRun(commands);
     if (commands.length === 0) {
-      setMessage('No valid commands found. Try: moveRight(1), turnDown(2), etc.');
+      setMessage('No valid commands found. Try: right(), down(2), etc.');
       setStatus('idle');
       return;
     }
 
     let currPos = { ...currentMaze.startPos };
     setPosition(currPos); // Start from beginning
+    setTrail([{...currPos}]);
 
-    for (const cmd of commands) {
+    for (let cmdIdx = 0; cmdIdx < commands.length; cmdIdx++) {
+      const cmd = commands[cmdIdx];
+      setRunningCmdIdx(cmdIdx);
       for (let i = 0; i < cmd.steps; i++) {
         // Wait for animation
-        await new Promise(resolve => setTimeout(resolve, 300));
+        await new Promise(resolve => setTimeout(resolve, 75));
         
         let nextPos = { ...currPos };
         if (cmd.direction === 'up') nextPos.y -= 1;
@@ -77,6 +90,12 @@ export default function MazeGame() {
 
         currPos = nextPos;
         setPosition(currPos);
+        setTrail(prev => {
+          if (!prev.some(p => p.x === currPos.x && p.y === currPos.y)) {
+            return [...prev, { ...currPos }];
+          }
+          return prev;
+        });
 
         if (currentMaze.isEnd(currPos.x, currPos.y)) {
             console.log(group);
@@ -133,6 +152,33 @@ export default function MazeGame() {
     setPosition(currentMaze.startPos);
     setStatus('idle');
     setMessage('');
+    setTrail([]);
+    setRunningCmdIdx(null);
+    setCommandsToRun([]);
+  };
+
+  const insertCommand = (cmdStr: string) => {
+    if (!codeRef.current) return;
+    const start = codeRef.current.selectionStart;
+    const end = codeRef.current.selectionEnd;
+    const currentCode = code;
+    
+    let textToInsert = cmdStr;
+    const needsNewlineBefore = start > 0 && currentCode[start - 1] !== '\n';
+    if (needsNewlineBefore) {
+      textToInsert = '\n' + textToInsert;
+    }
+    
+    const newCode = currentCode.substring(0, start) + textToInsert + currentCode.substring(end);
+    setCode(newCode);
+    
+    setTimeout(() => {
+      if (codeRef.current) {
+        codeRef.current.focus();
+        const cursorPosition = start + textToInsert.length - 1;
+        codeRef.current.setSelectionRange(cursorPosition, cursorPosition);
+      }
+    }, 0);
   };
 
   const nextLevel = () => {
@@ -148,7 +194,7 @@ export default function MazeGame() {
       
       {/* Maze Grid */}
       <div 
-        className="grid gap-1 bg-slate-300 dark:bg-slate-700 p-2 border-4 border-slate-400 dark:border-slate-600 rounded"
+        className="grid gap-[2px] bg-slate-300 dark:bg-slate-700 p-2 border-4 border-slate-400 dark:border-slate-600 rounded w-full max-w-2xl"
         style={{
           gridTemplateColumns: `repeat(${currentMaze.width}, minmax(0, 1fr))`
         }}
@@ -156,6 +202,7 @@ export default function MazeGame() {
         {currentMaze.grid.map((row, y) => (
           row.map((cell, x) => {
             const isCharacter = position.x === x && position.y === y;
+            const isTrailCell = trail.some(p => p.x === x && p.y === y);
             let bgColor = 'bg-slate-100 dark:bg-slate-800';
             if (cell === 'wall') bgColor = 'bg-slate-800 dark:bg-slate-900';
             else if (cell === 'start') bgColor = 'bg-green-200 dark:bg-green-800';
@@ -164,10 +211,13 @@ export default function MazeGame() {
             return (
               <div 
                 key={`${x}-${y}`} 
-                className={`w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center ${bgColor} ${isCharacter ? 'relative' : ''}`}
+                className={`w-full aspect-square flex items-center justify-center ${bgColor} ${isCharacter ? 'relative' : ''}`}
               >
+                {isTrailCell && !isCharacter && cell !== 'start' && cell !== 'end' && (
+                  <div className="w-1/3 h-1/3 bg-blue-300/50 dark:bg-blue-600/50 rounded-full"></div>
+                )}
                 {isCharacter && (
-                  <div className="w-6 h-6 bg-blue-500 rounded-full shadow-md z-10 transition-all"></div>
+                  <div className="w-1/2 h-1/2 bg-blue-500 rounded-full shadow-md z-10 transition-all"></div>
                 )}
               </div>
             );
@@ -176,10 +226,18 @@ export default function MazeGame() {
       </div>
 
       <div className="w-full max-w-lg flex flex-col gap-3">
+        <div className="flex gap-2">
+          <button onClick={() => insertCommand('up()')} disabled={status === 'playing'} className="flex-1 bg-slate-200 dark:bg-slate-700 text-sm font-bold py-1.5 rounded hover:bg-slate-300 dark:hover:bg-slate-600 disabled:opacity-50">Up()</button>
+          <button onClick={() => insertCommand('down()')} disabled={status === 'playing'} className="flex-1 bg-slate-200 dark:bg-slate-700 text-sm font-bold py-1.5 rounded hover:bg-slate-300 dark:hover:bg-slate-600 disabled:opacity-50">Down()</button>
+          <button onClick={() => insertCommand('left()')} disabled={status === 'playing'} className="flex-1 bg-slate-200 dark:bg-slate-700 text-sm font-bold py-1.5 rounded hover:bg-slate-300 dark:hover:bg-slate-600 disabled:opacity-50">Left()</button>
+          <button onClick={() => insertCommand('right()')} disabled={status === 'playing'} className="flex-1 bg-slate-200 dark:bg-slate-700 text-sm font-bold py-1.5 rounded hover:bg-slate-300 dark:hover:bg-slate-600 disabled:opacity-50">Right()</button>
+        </div>
+        
         <textarea
+          ref={codeRef}
           value={code}
           onChange={(e) => setCode(e.target.value)}
-          placeholder="Enter commands here e.g.:\nturnRight(2)\nturnDown(3)\nmoveRight(1)\n..."
+          placeholder="Enter commands here e.g.:\nright(2)\ndown(3)\nup()\n..."
           className="w-full h-40 p-3 font-mono text-sm border-2 rounded focus:outline-none focus:border-blue-500 shadow-inner dark:bg-slate-900 dark:border-slate-700"
           disabled={status === 'playing'}
         />
@@ -201,7 +259,21 @@ export default function MazeGame() {
           </button>
         </div>
 
-        {message && (
+        {status === 'playing' && commandsToRun.length > 0 && runningCmdIdx !== null && (
+          <div className="p-3 bg-blue-50 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 rounded text-sm font-mono flex items-center justify-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+            Currently running: {commandsToRun[runningCmdIdx].direction}({commandsToRun[runningCmdIdx].steps})
+          </div>
+        )}
+
+        {status === 'lost' && runningCmdIdx !== null && commandsToRun[runningCmdIdx] && (
+          <div className="p-3 bg-red-100 dark:bg-red-900/50 text-red-800 dark:text-red-200 rounded text-sm font-mono flex flex-col items-center gap-1 font-semibold text-center">
+            <span>Failed on command: {commandsToRun[runningCmdIdx].direction}({commandsToRun[runningCmdIdx].steps})</span>
+            <span className="text-xs font-normal opacity-80">{message}</span>
+          </div>
+        )}
+
+        {status !== 'playing' && status !== 'lost' && message && (
           <div className={`p-4 rounded font-semibold text-center ${status === 'won' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'}`}>
             {message}
           </div>
