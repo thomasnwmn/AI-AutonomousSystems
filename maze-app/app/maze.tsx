@@ -108,7 +108,7 @@ export default function MazeGame() {
                 } else if (currentLevelIdx === 5) {
                     setMessage('You escaped! Your third code is 4!');
                 } else if (currentLevelIdx === 6) {
-                  setMessage('You escaped! Your third code is 2!');
+                  setMessage('You escaped! Your fourth code is 2!');
                 } else {
                     setMessage('You escaped!');
                 }
@@ -120,7 +120,7 @@ export default function MazeGame() {
                 } else if (currentLevelIdx === 5) {
                     setMessage('You escaped! Your third code is 0!');
                 } else if (currentLevelIdx === 6) {
-                  setMessage('You escaped! Your third code is 1!');
+                  setMessage('You escaped! Your fourth code is 1!');
                 } else {
                     setMessage('You escaped!');
                 }
@@ -132,7 +132,7 @@ export default function MazeGame() {
                 } else if (currentLevelIdx === 5) {
                     setMessage('You escaped! Your third code is 9!');
                 } else if (currentLevelIdx === 6) {
-                  setMessage('You escaped! Your third code is 6!');
+                  setMessage('You escaped! Your fourth code is 6!');
                 } else {
                     setMessage('You escaped!');
                 }
@@ -188,10 +188,50 @@ export default function MazeGame() {
     }
   };
 
+  const unlockedDigits = (() => {
+    let digits = ['-', '-', '-', '-'];
+    const unlockIndex1 = currentLevelIdx > 1 || (currentLevelIdx === 1 && status === 'won');
+    const unlockIndex2 = currentLevelIdx > 3 || (currentLevelIdx === 3 && status === 'won');
+    const unlockIndex3 = currentLevelIdx > 5 || (currentLevelIdx === 5 && status === 'won');
+    const unlockIndex4 = currentLevelIdx > 6 || (currentLevelIdx === 6 && status === 'won');
+
+    if (group === 1) {
+      if (unlockIndex1) digits[0] = '7';
+      if (unlockIndex2) digits[1] = '6';
+      if (unlockIndex3) digits[2] = '4';
+      if (unlockIndex4) digits[3] = '2';
+    } else if (group === 2) {
+      if (unlockIndex1) digits[0] = '2';
+      if (unlockIndex2) digits[1] = '5';
+      if (unlockIndex3) digits[2] = '0';
+      if (unlockIndex4) digits[3] = '1';
+    } else if (group === 3) {
+      if (unlockIndex1) digits[0] = '5';
+      if (unlockIndex2) digits[1] = '8';
+      if (unlockIndex3) digits[2] = '9';
+      if (unlockIndex4) digits[3] = '6';
+    }
+    return digits;
+  })();
+
   return (
     <div className="flex flex-col items-center gap-6 w-full text-slate-800 dark:text-slate-200">
       <h1 className="text-3xl font-bold">Maze Level {currentLevelIdx + 1} of {levels.length}</h1>
       
+      {/* Digit Counter */}
+      {[1, 2, 3].includes(group) && (
+        <div className="flex flex-col items-center gap-2">
+          <div className="text-sm font-semibold uppercase tracking-wider text-slate-500">Access Code</div>
+          <div className="flex gap-4 text-3xl font-mono font-bold bg-slate-200 dark:bg-slate-800 p-4 rounded-xl shadow-inner">
+            {unlockedDigits.map((digit, i) => (
+              <div key={i} className={`w-14 h-16 flex items-center justify-center rounded-lg border-2 shadow-sm ${digit !== '-' ? 'border-green-500 text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/30' : 'border-slate-300 dark:border-slate-700 text-slate-400 dark:text-slate-600 bg-slate-100 dark:bg-slate-800/50'}`}>
+                {digit}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Maze Grid */}
       <div 
         className="grid gap-[2px] bg-slate-300 dark:bg-slate-700 p-2 border-4 border-slate-400 dark:border-slate-600 rounded w-full max-w-2xl"
