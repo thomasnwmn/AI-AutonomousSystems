@@ -105,9 +105,9 @@ export default function MazeGame() {
                     setMessage('You escaped! Your first code is 7!');
                 } else if (currentLevelIdx === 3) {
                     setMessage ('You escaped! Your second code is 6!')
-                } else if (currentLevelIdx === 6) {
+                } else if (currentLevelIdx === 5) {
                     setMessage('You escaped! Your third code is 4!');
-                } else if (currentLevelIdx === 9) {
+                } else if (currentLevelIdx === 6) {
                   setMessage('You escaped! Your third code is 2!');
                 } else {
                     setMessage('You escaped!');
@@ -117,9 +117,9 @@ export default function MazeGame() {
                     setMessage('You escaped! Your first code is 2!');
                 } else if (currentLevelIdx === 3) {
                     setMessage ('You escaped! Your second code is 5!')
-                } else if (currentLevelIdx === 6) {
+                } else if (currentLevelIdx === 5) {
                     setMessage('You escaped! Your third code is 0!');
-                } else if (currentLevelIdx === 9) {
+                } else if (currentLevelIdx === 6) {
                   setMessage('You escaped! Your third code is 1!');
                 } else {
                     setMessage('You escaped!');
@@ -129,9 +129,9 @@ export default function MazeGame() {
                     setMessage('You escaped! Your first code is 5!');
                 } else if (currentLevelIdx === 3) {
                     setMessage ('You escaped! Your second code is 8!')
-                } else if (currentLevelIdx === 6) {
+                } else if (currentLevelIdx === 5) {
                     setMessage('You escaped! Your third code is 9!');
-                } else if (currentLevelIdx === 9) {
+                } else if (currentLevelIdx === 6) {
                   setMessage('You escaped! Your third code is 6!');
                 } else {
                     setMessage('You escaped!');
